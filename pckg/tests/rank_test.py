@@ -1,6 +1,8 @@
 from pckg.src.login import *
 
 def test():
+    from pckg.src.anime import anime
+    
     #Get anime in each tab
     animes = []
 
@@ -63,3 +65,5 @@ def test():
             #Instantiate class
             animes.append(anime(name, url, ID))
     '''
+
+    browser.close()

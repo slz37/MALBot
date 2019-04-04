@@ -16,3 +16,5 @@ def test():
 
         #Or update tags
         #update_tag(browser, urls[i], anime_list[i])
+
+    browser.close()
