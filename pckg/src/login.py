@@ -35,6 +35,7 @@ def choose_free_browser():
     Selects a browser that is not currently
     in use by the user to run the program.
     '''
+    #To do: add driver for more browsers and check that they function
     
     free_browser = detect_free_browser()
     if free_browser == "Chrome":
@@ -58,6 +59,10 @@ def choose_free_browser():
             chrome_options = options
             )
     elif free_browser == "FireFox":
+        ##########################
+        # Not sure if this works #
+        ##########################
+        
         #Driver options
         WINDOW_SIZE = "1920, 1080"
         options = FirefoxOptions()
@@ -195,6 +200,16 @@ def goto_anime_list(tab = ""):
 
     return urls, anime_list
 
+def get_user_list_url():
+    '''
+    Once logged in, grabs the url
+    of the user's anime list.
+    '''
+
+    url = browser.find_element_by_xpath("//*[@class=\"header-profile-link\"]").text
+
+    return url
+
 #Regex patterns
 ID_PATTERN = re.compile("(?<=/)[\d]+(?=/)")
 
@@ -210,4 +225,5 @@ TABS = {
 
 browser = choose_free_browser()
 verify_login()
-sys.exit()
+
+LIST_URL = u"https://myanimelist.net/animelist/{}".format(get_user_list_url())
