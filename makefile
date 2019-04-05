@@ -13,5 +13,6 @@ clean :
 	@rm -rf __pycache__
 	@rm -rf pckg/src/__pycache__
 	@rm -rf pckg/tests/__pycache__
-	@rm -rf debug
+	@rm -rf geckodriver.log
+	@rm -rf debug.log
 	@rm -rf *.pyc
