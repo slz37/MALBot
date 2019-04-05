@@ -8,7 +8,7 @@ Currently supports chrome and opera. Firefox currently gets stuck trying to load
 
 Works with windows and python 3.
 
-## To do:
+## To do
 Finish ranking algorithm.
 Fix Firefox.
 Add Linux support.
