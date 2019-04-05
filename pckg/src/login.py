@@ -10,23 +10,33 @@ def detect_free_browser():
     
     chrome = False
     firefox = False
+    opera = False
+    edge = False
 
     for proc in psutil.process_iter():
         proc_name = proc.name()
 
-        #Check
+        #Check if browser open
         if proc_name == "chrome.exe":
             chrome = True
         elif proc_name == "firefox.exe":
             firefox = True
+        elif proc_name == "MicrosoftEdge.exe":
+            opera = True
+        elif proc_name == "opera.exe":
+            edge = True
         else:
             continue
 
-    #Choose browser
+    #Browser hierarchy
     if not chrome:
         return "Chrome"
     elif not firefox:
-        return "FireFox"
+        return "Firefox"
+    elif not opera:
+        return "Opera"
+    elif not edge:
+        return "Microsoft Edge"
     else:
         return None
 
@@ -35,7 +45,7 @@ def choose_free_browser():
     Selects a browser that is not currently
     in use by the user to run the program.
     '''
-    #To do: add driver for more browsers and check that they function
+    sys.path.append(os.path.join(os.path.dirname(__file__) + "\\drivers"))
     
     free_browser = detect_free_browser()
     if free_browser == "Chrome":
@@ -44,9 +54,14 @@ def choose_free_browser():
         options = ChromeOptions()
 
         #Choose driver
-        CHROME_PATH = "C:\\Users\\" + getpass.getuser() + \
-                      "\\AppData\\Local\\Google\\Chrome\\User Data\\"
-        DRIVER_PATH = "chromedriver"
+        try:
+            CHROME_PATH = "C:\\Users\\" + getpass.getuser() + \
+                          "\\AppData\\Local\\Google\\Chrome\\User Data\\"
+        except:
+            print("Could not find Chrome path.")
+            sys.exit
+            
+        DRIVER_PATH = os.path.join(os.path.dirname(__file__), "..\..\drivers\chromedriver")
         options.add_argument("user-data-dir={}".format(CHROME_PATH))
 
         #Window properties
@@ -58,7 +73,7 @@ def choose_free_browser():
             executable_path = DRIVER_PATH,
             chrome_options = options
             )
-    elif free_browser == "FireFox":
+    elif free_browser == "Firefox":
         ##########################
         # Not sure if this works #
         ##########################
@@ -68,9 +83,14 @@ def choose_free_browser():
         options = FirefoxOptions()
         
         #Choose driver
-        FIREFOX_PATH = "C:\\Users\\" + getpass.getuser() + \
+        try:
+            FIREFOX_PATH = "C:\\Users\\" + getpass.getuser() + \
                        "\\AppData\\Roaming\\Mozilla\\Firefox\\Profiles\\03nhhp88.default"
-        DRIVER_PATH = "geckodriver"
+        except:
+            print("Could not find Firefox path.")
+            sys.exit
+
+        DRIVER_PATH = os.path.join(os.path.dirname(__file__), "..\..\drivers\geckodriver")
         #options.add_argument("user-data-dir={}".format(FIREFOX_PATH))
         ffprofile = webdriver.FirefoxProfile(FIREFOX_PATH)
 
@@ -84,6 +104,12 @@ def choose_free_browser():
             executable_path = DRIVER_PATH,
             firefox_profile = ffprofile
             )
+    elif free_browser == "Opera":
+        #todo
+        return
+    elif free_browser == "Microsoft Edge":
+        #todo
+        return
     else:
         print("No free browser.")
         sys.exit()
@@ -113,6 +139,56 @@ def verify_login():
     else:
         print("Please login to MAL before running this program.")
         sys.exit()
+
+def goto_anime_list(tab = ""):
+    '''
+    Moves to anime list and gathers the urls and
+    names of all anime in list. If list default
+    is not all anime, this will only grab the
+    ones from the current tab.
+    '''
+    time.sleep(3)
+
+    #Go to specified tab, otherwise default
+    if tab:
+        browser.get(LIST_URL + "?status={}&tag=".format(TABS[tab]))
+    else:
+        browser.get(LIST_URL)
+
+    #Get anime and urls
+    anime_list = browser.find_elements_by_class_name("animetitle")
+    urls = browser.find_elements_by_xpath("//*[@class=\"animetitle\"]")
+
+    return urls, anime_list
+
+def get_user_list_url():
+    '''
+    Once logged in, grabs the url
+    of the user's anime list.
+    '''
+
+    url = browser.find_element_by_xpath("//*[@class=\"header-profile-link\"]").text
+
+    return url
+
+#Regex patterns
+ID_PATTERN = re.compile("(?<=/)[\d]+(?=/)")
+
+#MAL Anime List Tabs
+TABS = {
+        "Currently Watching": 1,
+        "Completed": 2,
+        "On Hold": 3,
+        "Dropped": 4,
+        "Plan to Watch": 6,
+        "All Anime": 7
+        } 
+
+browser = choose_free_browser()
+verify_login()
+
+LIST_URL = u"https://myanimelist.net/animelist/{}".format(get_user_list_url())
+
 
 def login():
     ##############
@@ -178,52 +254,3 @@ def login():
     browser.find_element_by_xpath("//input[@value=\"Login\"]").click()
 
     verify_login()
-
-def goto_anime_list(tab = ""):
-    '''
-    Moves to anime list and gathers the urls and
-    names of all anime in list. If list default
-    is not all anime, this will only grab the
-    ones from the current tab.
-    '''
-    time.sleep(3)
-
-    #Go to specified tab, otherwise default
-    if tab:
-        browser.get(LIST_URL + "?status={}&tag=".format(TABS[tab]))
-    else:
-        browser.get(LIST_URL)
-
-    #Get anime and urls
-    anime_list = browser.find_elements_by_class_name("animetitle")
-    urls = browser.find_elements_by_xpath("//*[@class=\"animetitle\"]")
-
-    return urls, anime_list
-
-def get_user_list_url():
-    '''
-    Once logged in, grabs the url
-    of the user's anime list.
-    '''
-
-    url = browser.find_element_by_xpath("//*[@class=\"header-profile-link\"]").text
-
-    return url
-
-#Regex patterns
-ID_PATTERN = re.compile("(?<=/)[\d]+(?=/)")
-
-#MAL Anime List Tabs
-TABS = {
-        "Currently Watching": 1,
-        "Completed": 2,
-        "On Hold": 3,
-        "Dropped": 4,
-        "Plan to Watch": 6,
-        "All Anime": 7
-        } 
-
-browser = choose_free_browser()
-verify_login()
-
-LIST_URL = u"https://myanimelist.net/animelist/{}".format(get_user_list_url())
