@@ -32,11 +32,10 @@ def detect_free_browser():
     if not chrome:
         return "Chrome"
     elif not firefox:
-        return "Firefox"
+        pass #Not working right now
+        #return "Firefox"
     elif not opera:
         return "Opera"
-    elif not edge:
-        return "Microsoft Edge"
     else:
         return None
 
@@ -49,6 +48,10 @@ def choose_free_browser():
     
     free_browser = detect_free_browser()
     if free_browser == "Chrome":
+        '''
+        Works when no sessions open
+        '''
+        
         #Driver options
         WINDOW_SIZE = "1920, 1080"
         options = ChromeOptions()
@@ -63,7 +66,7 @@ def choose_free_browser():
             
         DRIVER_PATH = os.path.join(os.path.dirname(__file__), "..\..\drivers\chromedriver")
         options.add_argument("user-data-dir={}".format(CHROME_PATH))
-
+    
         #Window properties
         #options.add_argument("--headless")  
         options.add_argument("--window-size=%s" % WINDOW_SIZE)
@@ -74,9 +77,9 @@ def choose_free_browser():
             chrome_options = options
             )
     elif free_browser == "Firefox":
-        ##########################
-        # Not sure if this works #
-        ##########################
+        '''
+        Freezes when loading page
+        '''
         
         #Driver options
         WINDOW_SIZE = "1920, 1080"
@@ -91,7 +94,6 @@ def choose_free_browser():
             sys.exit
 
         DRIVER_PATH = os.path.join(os.path.dirname(__file__), "..\..\drivers\geckodriver")
-        #options.add_argument("user-data-dir={}".format(FIREFOX_PATH))
         ffprofile = webdriver.FirefoxProfile(FIREFOX_PATH)
 
         #Window properties
@@ -105,11 +107,37 @@ def choose_free_browser():
             firefox_profile = ffprofile
             )
     elif free_browser == "Opera":
-        #todo
-        return
-    elif free_browser == "Microsoft Edge":
-        #todo
-        return
+        '''
+        Works when no sessions open
+        '''
+        
+        #Driver options
+        WINDOW_SIZE = "1920, 1080"
+        options = OperaOptions()
+
+        options.binary_location = "C:\\Users\\" + getpass.getuser() + \
+                                  "AppData\\Local\\Programs\\Opera\\58.0.3135.131\\opera.exe"
+
+        #Choose driver
+        try:
+            OPERA_PATH = "C:\\Users\\" + getpass.getuser() + \
+                          "\\AppData\Roaming\\Opera Software\\Opera Stable"
+        except:
+            print("Could not find Opera path.")
+            sys.exit
+            
+        DRIVER_PATH = os.path.join(os.path.dirname(__file__), "..\..\drivers\operadriver")
+        options.add_argument("user-data-dir={}".format(OPERA_PATH))
+    
+        #Window properties
+        #options.add_argument("--headless")  
+        options.add_argument("--window-size=%s" % WINDOW_SIZE)
+
+        #Initiate driver and load page
+        browser = webdriver.Opera(
+            executable_path = DRIVER_PATH,
+            options = options
+            )
     else:
         print("No free browser.")
         sys.exit()
