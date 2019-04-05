@@ -47,23 +47,4 @@ def test():
     #Get rankings
     rank(animes)
 
-    '''
-    #Get anime in each tab
-    animes = []
-    for tab in TABS:
-        #Skip all anime tab
-        if tab == "All Anime":
-            continue
-            
-        #Loop over all anime
-        for i in range(len(anime_list)):
-            #Get anime info
-            name = anime_list[i].text
-            url = urls[i].get_attribute("href")
-            ID = re.search(ID_PATTERN, url).group()
-
-            #Instantiate class
-            animes.append(anime(name, url, ID))
-    '''
-
     browser.close()
