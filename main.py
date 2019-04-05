@@ -38,6 +38,11 @@ elif func == "rank":
             #Instantiate class
             animes.append(anime(name, url, ID))
 
+        #Replace related anime and recommendations with objects
+        for anime in animes:
+            anime.replace_anime(animes, "related")
+            anime.replace_anime(animes, "recommendations")
+
         #Rank
         rank(animes)
         browser.close()

@@ -17,7 +17,7 @@ class anime():
         self.user_rating = self.browser.find_element_by_id("scoreval{}".format(self.ID)).text
 
         #Load anime page
-        self.load_page()
+        self._load_page()
 
         #Initiate empty arrays
         self.related_anime = []
@@ -25,17 +25,20 @@ class anime():
 
         #Properties from anime page
         self.progress = browser.find_element_by_id("myinfo_watchedeps").get_attribute("value")
-        self.related_anime = self.get_related_anime()        
-        self.genres = self.get_genres()
+        self.related_anime = self._get_related_anime()        
+        self.genres = self._get_genres()
+
+        titles, users = self._get_recommendations()
+        self.recommendations = dict(zip(titles, users))
         
         num_episodes = self.browser.find_element_by_xpath("//div[contains(.//span, \"Episodes:\")]").text
         self.num_episodes = num_episodes.split(" ")[1]
-        self.duration = self.get_duration()
+        self.duration = self._get_duration()
 
         #Done now, so return back to list
-        self.close_page()
+        self._close_page()
 
-    def load_page(self):
+    def _load_page(self):
         '''
         Loads the anime's page to grab all
         necessary info.
@@ -46,7 +49,7 @@ class anime():
         self.browser.execute_script("window.open(\"{}\");".format(self.url))
         self.browser.switch_to_window(self.browser.window_handles[1])
 
-    def close_page(self):
+    def _close_page(self):
         '''
         Closes the anime's page once
         we are done with it.
@@ -56,7 +59,7 @@ class anime():
         self.browser.close()
         self.browser.switch_to_window(self.browser.window_handles[0])
 
-    def get_genres(self):
+    def _get_genres(self):
         '''
         Obtains a formatted string of genres for the
         current anime in list.
@@ -71,7 +74,7 @@ class anime():
 
         return genres
 
-    def get_related_anime(self):
+    def _get_related_anime(self):
         '''
         Grabs the related anime from the
         current page.
@@ -79,17 +82,16 @@ class anime():
 
         #Get related anime
         related_anime = []
-        related = self.browser.find_element_by_class_name("anime_detail_related_anime").text
-        related_anime_full = related.split("\n")
+        related = self.browser.find_element_by_class_name("anime_detail_related_anime")
 
-        #Remove descriptors
-        for descriptor in related_anime_full:
-            name = descriptor.split(": ", 1)[1]
-            related_anime.append(name)
+        #Now get urls and remove manga
+        for anime in related.find_elements_by_css_selector("a"):
+            if "manga" not in anime.get_attribute("href"):
+                related_anime.append(anime.text)
 
         return related_anime
 
-    def get_duration(self):
+    def _get_duration(self):
         '''
         Grabs the duration in minutes of the
         anime to weight by length for movies/OVAs.
@@ -119,24 +121,51 @@ class anime():
 
         return minutes * int(self.num_episodes)
 
-    def replace_related_anime(self, animes):
+    def _get_recommendations(self):
+        '''
+        Grabs the recommended anime and the number
+        of recommendations.
+        '''
+        import re
+
+        #Regex conventions
+        user_convention = re.compile("(?<=\"users\">).+?(?=</span>)")
+        title_convention = re.compile("(?<=\"title fs10\">).+?(?=</span>)")
+        
+        #Get html then users and recommendations
+        html_source = self.browser.page_source
+        users = re.findall(user_convention, html_source)
+        titles = re.findall(title_convention, html_source)
+
+        #Format users to only numbers
+        for i, user in enumerate(users):
+            users[i] = user.split(" ")[0]
+
+        #Check for mismatch
+        if len(users) != len(titles):
+            print("Mismatch between number of recommendations and number of users.")
+            sys.exit()
+
+        return titles, users
+
+    def replace_anime(self, animes, attribute):
         '''
         Replaces the names of related anime with the
         anime class object.
         '''
 
-        #Replace all
-        for i, anime in enumerate(self.related_anime):
-            anime_object = [x for x in animes if x.name == anime.lower()]
+        if attribute == "related":
+            #Replace all
+            for i, anime in enumerate(self.related_anime):
+                anime_object = [x for x in animes if x.name == anime.lower()]
 
-            #Replace if found, otherwise put placeholder
-            if anime_object:
-                self.related_anime[i] = anime_object[0]
+                #Replace if found
+                if anime_object:
+                    self.related_anime[i] = anime_object[0]
+        elif attribute == "recommendations":
+            for anime in list(self.recommendations.keys()):
+                anime_object = [x for x in animes if x.name == anime.lower()]
 
-    def set_ranking(self, rank):
-        '''
-        Sets the ranking of the anime on a
-        list of plan to watch.
-        '''
-
-        self.ranking = rank
+                #Replace if found
+                if anime_object:
+                    self.recommendations[anime_object[0]] = self.recommendations.pop(anime)

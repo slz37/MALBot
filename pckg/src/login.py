@@ -1,6 +1,23 @@
-from .libs import *
-import getpass
-import psutil as psutil
+if __name__ == "__main__":
+    '''
+    Creates a browser for you to manually
+    do things for testing.
+    '''
+    
+    from selenium import webdriver
+    from selenium.webdriver.firefox.options import Options as FirefoxOptions
+    from selenium.webdriver.chrome.options import Options as ChromeOptions
+    from selenium.webdriver.opera.options import Options as OperaOptions
+    from selenium.webdriver.common.keys import Keys
+
+    import re, sys, os, time
+
+    import getpass
+    import psutil as psutil
+else:
+    from .libs import *
+    import getpass
+    import psutil as psutil
 
 def detect_free_browser():
     '''
@@ -11,7 +28,6 @@ def detect_free_browser():
     chrome = False
     firefox = False
     opera = False
-    edge = False
 
     for proc in psutil.process_iter():
         proc_name = proc.name()
@@ -21,18 +37,16 @@ def detect_free_browser():
             chrome = True
         elif proc_name == "firefox.exe":
             firefox = True
-        elif proc_name == "MicrosoftEdge.exe":
-            opera = True
         elif proc_name == "opera.exe":
-            edge = True
+            opera = True
         else:
             continue
 
     #Browser hierarchy
     if not chrome:
         return "Chrome"
-    elif not firefox:
-        pass #Not working right now
+    #elif not firefox:
+        #Not working right now
         #return "Firefox"
     elif not opera:
         return "Opera"
@@ -116,7 +130,7 @@ def choose_free_browser():
         options = OperaOptions()
 
         options.binary_location = "C:\\Users\\" + getpass.getuser() + \
-                                  "AppData\\Local\\Programs\\Opera\\58.0.3135.131\\opera.exe"
+                                  "\\AppData\\Local\\Programs\\Opera\\58.0.3135.131\\opera.exe"
 
         #Choose driver
         try:
@@ -168,7 +182,7 @@ def verify_login():
         print("Please login to MAL before running this program.")
         sys.exit()
 
-def goto_anime_list(tab = ""):
+def goto_anime_list(tab = "", test = ""):
     '''
     Moves to anime list and gathers the urls and
     names of all anime in list. If list default
@@ -177,11 +191,14 @@ def goto_anime_list(tab = ""):
     '''
     time.sleep(3)
 
-    #Go to specified tab, otherwise default
-    if tab:
-        browser.get(LIST_URL + "?status={}&tag=".format(TABS[tab]))
+    if not test:
+        #Go to specified tab, otherwise default
+        if tab:
+            browser.get(LIST_URL + "?status={}&tag=".format(TABS[tab]))
+        else:
+            browser.get(LIST_URL)
     else:
-        browser.get(LIST_URL)
+        browser.get(test)
 
     #Get anime and urls
     anime_list = browser.find_elements_by_class_name("animetitle")
@@ -198,9 +215,6 @@ def get_user_list_url():
     url = browser.find_element_by_xpath("//*[@class=\"header-profile-link\"]").text
 
     return url
-
-#Regex patterns
-ID_PATTERN = re.compile("(?<=/)[\d]+(?=/)")
 
 #MAL Anime List Tabs
 TABS = {
@@ -235,9 +249,6 @@ def login():
         "user_name": input("MAL Username: "),
         "password": input("MAL Password: "),
         }
-
-    #Regex patterns
-    ID_PATTERN = re.compile("(?<=/)[\d]+(?=/)")
 
     #MAL Anime List Tabs
     TABS = {
