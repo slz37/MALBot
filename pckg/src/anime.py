@@ -14,7 +14,14 @@ class anime():
         self.ID = ID
         self.browser = browser
         self.status = tab
+        
         self.user_rating = self.browser.find_element_by_id("scoreval{}".format(self.ID)).text
+
+        #Replace no rating with avg rating and make sure it's an int
+        if self.user_rating == "-":
+            self.user_rating = 5
+        else:
+            self.user_rating = int(self.user_rating)
 
         #Load anime page
         self._load_page()
@@ -137,9 +144,12 @@ class anime():
         users = re.findall(user_convention, html_source)
         titles = re.findall(title_convention, html_source)
 
-        #Format users to only numbers
+        #Format users to only numbers - weight autorecs as 1 user
         for i, user in enumerate(users):
-            users[i] = user.split(" ")[0]
+            if user == "AutoRec":
+                users[i] = 1
+            else:
+                users[i] = int(user.split(" ")[0])
 
         #Check for mismatch
         if len(users) != len(titles):

@@ -11,28 +11,27 @@ def rank(animes):
     '''
     Things to include when ranking:
     -Average rating of genres
-    -Rating of related anime if on list
-    -Number of related anime on list
-    -Status of related anime(completed, dropped, etc.)
-    
+    -Average rating and status of related anime if on list
     -For a specific anime, if a recommendation is in the user's list, weight by
-     number of users recommending
+     number of users recommending, status, and rating if available
     '''
 
     #Setup and calculate genre avgs
     genres, avgs, nums = setup_genres()
     genre_avgs = genre_avg(animes, genres, avgs, nums)
+    print(genre_avgs)
 
     #Update and output results
-    test = update_rankings(animes, genre_avgs)
-    for anime in test:
+    rankings = calculate_rankings(animes, genre_avgs)
+    
+    for anime in rankings:
         if anime.status == "Plan to Watch":
-            print("{} {}".format(round(anime.ranking, 2), anime.name))
+            print("{:05.2f} {}".format(round(anime.ranking, 2), anime.name))
     sys.exit()
 
     return rankings
 
-def update_rankings(animes, genre_avg):
+def calculate_rankings(animes, genre_avg):
     '''
     Takes in the current rankings and
     a metric by which to weight them
@@ -40,31 +39,58 @@ def update_rankings(animes, genre_avg):
     on that metric.
     '''
 
-    #Not sure how to weight these yet
+    #Not sure how to weight these yet - should be some percentage
     status = {
-        "Currently Watching": 6,
-        "Completed": 10,
-        "On Hold": 4,
-        "Dropped": 1,
-        "Plan to Watch": 5,
+        "Dropped": 0,
+        "On Hold": 1/4,
+        "Plan to Watch": 2/4,
+        "Currently Watching": 3/4,
+        "Completed": 1,
         } 
 
+    #Calculate ranking for all anime in PTW list
     for anime in animes:
         if anime.status == "Plan to Watch":
             #Genres
-            for genre in anime.genres:
-                anime.ranking += genre_avg[genre]
-
-            anime.ranking /= len(anime.genres) #normalize
+            genre_score = sum([genre_avg[genre] for genre in anime.genres])
+            genre_length = len(anime.genres)
 
             #Related anime
-            for related_anime in anime.related_anime:
-                if related_anime in animes:
-                    #Factor in rating of related anime
-                    if related_anime.user_rating != "-":
-                        anime.ranking += (int(related_anime.user_rating) * status[related_anime.status]) / 100
-                    else:
-                        anime.ranking += (5 * status[related_anime.status]) / 100 #no ranking -> neutral
+            related_animes = [rel for rel in anime.related_anime if rel in animes]
+
+            #Map values from [0, 20] to [0, 1] - may need to increase this later
+            if len(related_animes) > 20:
+                print("Warning, # of recommended animes is greater than scale factor.")
+                
+            scaled_rel = len(related_animes) / 20
+            
+            related_score = sum([(rel.user_rating * status[rel.status] * scaled_rel) for rel in related_animes])
+            related_length = len(related_animes)
+
+            #Separate keys and values
+            recommended_animes = anime.recommendations
+            recommended_keys = [rec for rec in recommended_animes if rec in animes]
+            recommended_values = [recommended_animes[rec] for rec in recommended_keys]
+
+            #Map values from [0, 100] to [0, 1] - may need to increase this later
+            if len(recommended_animes) > 100:
+                print("Warning, # of recommended animes is greater than scale factor.")
+                
+            scaled_rec_values = [x / 100 for x in recommended_values]
+            
+            #Recommended anime
+            recommended_score = 0
+            for i, rec in enumerate(recommended_keys):
+                recommended_score += rec.user_rating * status[rec.status] * scaled_rec_values[i]
+            recommended_length = len(recommended_keys)
+
+            #Calculate overall average now
+            if anime.name.lower() == ".hack//g.u. returner":
+                print(related_animes)
+                print(genre_score, related_score, recommended_score,
+                      genre_length, related_length, recommended_length)
+            anime.ranking = (genre_score + related_score + recommended_score) / \
+                            (genre_length + related_length + recommended_length)
 
     #Now sort by final rankings
     rankings = sorted(animes, key = lambda x: x.ranking, reverse = True)
@@ -96,12 +122,11 @@ def genre_avg(animes, genres, avgs, nums):
     anime.
     '''
 
-    #Check if each anime has rating and update avg for all genres
+    #Ignore PTW ratings and update avg for all genres
     for anime in animes:
-        if anime.user_rating != "-":
+        if anime.status != "Plan to Watch":
             for genre in anime.genres:
                 index = genres.index(genre)
-
                 avgs[index] = (nums[index] * avgs[index] + int(anime.user_rating)) / (nums[index] + 1)
                 nums[index] += 1
 

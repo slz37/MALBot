@@ -17,8 +17,8 @@ def test():
            "48"]
     tabs = ["Plan to Watch",
             "Plan to Watch",
-            "Completed",
-            "Plan to Watch"]
+            "Plan to Watch",
+            "Completed"]
     
     #Get anime in each tab
     animes = []
