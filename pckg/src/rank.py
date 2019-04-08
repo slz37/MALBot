@@ -48,25 +48,6 @@ def rank(animes):
         print(anime.name, genre_rating, rel_rating, nrel_rating, rec_rating, nrec_rating)
 
         anime.ranking = (genre_rating + rel_rating + nrel_rating + rec_rating + nrec_rating) / 5
-
-    '''
-    #Calculate ranking for all anime in PTW list
-    for anime in animes:
-        if anime.status == "Plan to Watch":
-            #Score each parameter
-            genre_rating, genre_length = calculate_genre_score(anime, genre_avgs)
-            related_score, related_length = calculate_related_score(anime, animes, status)
-            recommended_score, recommended_length = calculate_recommended_score(anime, animes, status)
-
-            #Print stats to check for correctness
-            if anime.name.lower() == ".hack//g.u. returner":
-                print(genre_rating, related_score, recommended_score,
-                      related_length, recommended_length)
-                
-            #Calculate ranking
-            anime.ranking = (genre_rating + related_score + recommended_score) / \
-                            (related_length + recommended_length)
-    '''
     
     #Now sort by final rankings
     rankings = sorted(animes, key = lambda x: x.ranking, reverse = True)
@@ -211,57 +192,3 @@ def calculate_recommended_score(anime, animes, status):
         recommended_score += rec.user_rating * status[rec.status]
 
     return recommended_score, num_rec
-
-def stats_of_stats(anime, genre_avgs):
-    '''
-    For a list of averages and standard
-    deviations, calculate the total average
-    and standard deviation.
-    '''
-    
-    #Calculate mu
-    n = 0
-    mu = 0
-    for genre in anime.genres:
-        n += genre_avgs[genre][2]
-        mu += genre_avgs[genre][0] * genre_avgs[genre][2]
-    mu = mu / n
-
-    #Calculate std
-    n = 0
-    var = 0
-    for genre in anime.genres:
-        n += genre_avgs[genre][2]
-        var += genre_avgs[genre][2] * (genre_avgs[genre][1] + genre_avgs[genre][0]**2)
-
-    var = var / n - mu**2
-    std = np.sqrt(var)
-
-    return mu, std
-
-def iterative_stats(arr):
-    '''
-    Iteratively calculates the mean and
-    standard deviation of an array.
-    '''
-
-    #Initialize
-    mu = 1
-    sigmasq = 0
-
-    #Iterative calculations
-    for i, ele in enumerate(arr):
-        #i starts at 0, so inc by 1
-        n = i + 1
-
-        #Need muprev for next sigmasq
-        muprev = mu
-
-        #Calculate next values
-        mu = (n * muprev + ele) / (n + 1)
-        sigmasq = sigmasq + ((ele - muprev) * (ele - mu) - sigmasq) / (n + 1)
-
-    #Turn variance into std.
-    sigma = np.sqrt(sigmasq)
-
-    return mu, sigma

@@ -199,6 +199,7 @@ def goto_anime_list(tab = "", test = ""):
             browser.get(LIST_URL)
     else:
         browser.get(test)
+        return
 
     #Get anime and urls
     anime_list = browser.find_elements_by_class_name("animetitle")

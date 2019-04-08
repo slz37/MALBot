@@ -48,8 +48,7 @@ def test():
     animes = []
 
     #Go to my list for testing but don't need data
-    _, _ = goto_anime_list("",
-                           u"https://myanimelist.net/animelist/Combinatorics")
+    goto_anime_list("", u"https://myanimelist.net/animelist/Combinatorics")
 
     for i in range(0, len(names)):
         #Preselected data
