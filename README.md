@@ -10,5 +10,6 @@ Works with windows and python 3.
 
 ## To do
 Finish ranking algorithm.</br>
+Track all related anime (sub-sequels, sub-prequels, etc.). </br>
 Fix Firefox.</br>
 Add Linux/mac support.
