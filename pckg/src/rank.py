@@ -90,7 +90,7 @@ def normalize(i, arr):
         return arr[i]
 
     #Calculate normalized rating
-    rating = (10 * arr[i] - min(arr)) / (max(arr) - min(arr))
+    rating = (10 * (arr[i] - min(arr))) / (max(arr) - min(arr))
 
     return rating
 
