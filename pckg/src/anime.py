@@ -17,9 +17,10 @@ class anime():
         
         self.user_rating = self.browser.find_element_by_id("scoreval{}".format(self.ID)).text
 
-        #Replace no rating with avg rating and make sure it's an int
+        #Set default rating and convert to int if necessary
         if self.user_rating == "-":
-            self.user_rating = 5
+            self.user_rating = 0 #use 0 as base
+            #self.user_rating = 5 #use average as base
         else:
             self.user_rating = int(self.user_rating)
 
