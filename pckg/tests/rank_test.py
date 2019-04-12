@@ -4,20 +4,18 @@ def test():
     from pckg.src.anime import anime
 
     names = ["occultic;nine",
-             "black clover",]
-    '''
-    "fate/stay night movie: heaven's feel - i. presage flower",
-    "sword art online",
-    ".hack//g.u. trilogy",
-    ".hack//g.u. returner",
-    ".hack//sign",
-    ".hack//intermezzo",
-    ".hack//liminality",
-    "log horizon",
-    "btooom!",
-    "mahoutsukai no yome",
-    "shinsekai yori"]
-    '''
+             "black clover",
+             "fate/stay night movie: heaven's feel - i. presage flower",
+             "sword art online",
+             ".hack//g.u. trilogy",
+             ".hack//g.u. returner",
+             ".hack//sign",
+             ".hack//intermezzo",
+             ".hack//liminality",
+             "log horizon",
+             "btooom!",
+             "mahoutsukai no yome",
+             "shinsekai yori"]
     urls = ["https://myanimelist.net/anime/32962/Occultic_Nine",
             "https://myanimelist.net/anime/34572/Black_Clover",
             "https://myanimelist.net/anime/25537/Fate_stay_night_Movie__Heavens_Feel_-_I_Presage_Flower",
@@ -77,12 +75,12 @@ def test():
         animes.append(anime(browser, name, url, ID, tab))
 
     #Replace related anime and recommendations with objects
-    for ani in animes:
-        anime.save(ani)
-        anime.load(ani)
-        
+    for ani in animes:      
         ani.replace_anime(animes, "related")
         ani.replace_anime(animes, "recommendations")
+    anime.save(animes)
+
+    animes = anime.load()
 
     #Get rankings
     rank(animes)

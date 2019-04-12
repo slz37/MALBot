@@ -76,7 +76,7 @@ class anime():
         file.close()
 
     @staticmethod
-    def load(anime):
+    def load():
         '''
         Loads a previously parse anime with
         its attributes.
@@ -85,6 +85,8 @@ class anime():
         file = open("anime.txt", "rb")
         ani = pickle.load(file)
         file.close()
+
+        return ani
         
     def _close_page(self, browser):
         '''
