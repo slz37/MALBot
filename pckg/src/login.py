@@ -1,24 +1,3 @@
-if __name__ == "__main__":
-    '''
-    Creates a browser for you to manually
-    do things for testing.
-    '''
-    
-    from selenium import webdriver
-    from selenium.webdriver.firefox.options import Options as FirefoxOptions
-    from selenium.webdriver.chrome.options import Options as ChromeOptions
-    from selenium.webdriver.opera.options import Options as OperaOptions
-    from selenium.webdriver.common.keys import Keys
-
-    import re, sys, os, time
-
-    import getpass
-    import psutil as psutil
-else:
-    from .libs import *
-    import getpass
-    import psutil as psutil
-
 def detect_free_browser():
     '''
     Checks system processes for
@@ -166,7 +145,7 @@ def choose_free_browser():
     
     return browser
 
-def verify_login():
+def verify_login(browser):
     '''
     Checks the html after attempting to
     login to confirm whether login
@@ -182,7 +161,7 @@ def verify_login():
         print("Please login to MAL before running this program.")
         sys.exit()
 
-def goto_anime_list(tab = "", test = ""):
+def goto_anime_list(browser, list_url = "", tab = ""):
     '''
     Moves to anime list and gathers the urls and
     names of all anime in list. If list default
@@ -191,14 +170,14 @@ def goto_anime_list(tab = "", test = ""):
     '''
     time.sleep(3)
 
-    if not test:
+    if tab:
         #Go to specified tab, otherwise default
         if tab:
-            browser.get(LIST_URL + "?status={}&tag=".format(TABS[tab]))
+            browser.get(list_url + "?status={}&tag=".format(TABS[tab]))
         else:
-            browser.get(LIST_URL)
+            browser.get(list_url)
     else:
-        browser.get(test)
+        browser.get(list_url)
         return
 
     #Get anime and urls
@@ -207,7 +186,7 @@ def goto_anime_list(tab = "", test = ""):
 
     return urls, anime_list
 
-def get_user_list_url():
+def get_user_list_url(browser):
     '''
     Once logged in, grabs the url
     of the user's anime list.
@@ -217,6 +196,41 @@ def get_user_list_url():
 
     return url
 
+def login():
+    '''
+    Performs initial setup of the browser and
+    verifies that the user is currently logged
+    in to MAL on the chosen browser.
+    '''
+    
+    browser = choose_free_browser()    
+    verify_login(browser)
+
+    list_url = u"https://myanimelist.net/animelist/{}".format(get_user_list_url(browser))
+
+    return browser, list_url
+
+if __name__ == "__main__":
+    '''
+    Creates a browser for you to manually
+    do things for testing.
+    '''
+    
+    from selenium import webdriver
+    from selenium.webdriver.firefox.options import Options as FirefoxOptions
+    from selenium.webdriver.chrome.options import Options as ChromeOptions
+    from selenium.webdriver.opera.options import Options as OperaOptions
+    from selenium.webdriver.common.keys import Keys
+
+    import re, sys, os, time
+
+    import getpass
+    import psutil as psutil
+else:
+    from .libs import *
+    import getpass
+    import psutil as psutil
+
 #MAL Anime List Tabs
 TABS = {
         "Currently Watching": 1,
@@ -225,72 +239,4 @@ TABS = {
         "Dropped": 4,
         "Plan to Watch": 6,
         "All Anime": 7
-        } 
-
-browser = choose_free_browser()
-verify_login()
-
-LIST_URL = u"https://myanimelist.net/animelist/{}".format(get_user_list_url())
-
-
-def login():
-    ##############
-    # DEPRECATED #
-    ##############
-    
-    '''
-    First method for obtaining user credentials
-    and logging in to MAL. Replaced with grabbing cookies
-    from browser instead, so user does not have to enter
-    their credentials to an untrusted source.
-    '''
-    
-    #User info
-    MAL_PAYLOAD = {
-        "user_name": input("MAL Username: "),
-        "password": input("MAL Password: "),
         }
-
-    #MAL Anime List Tabs
-    TABS = {
-            "Currently Watching": 1,
-            "Completed": 2,
-            "On Hold": 3,
-            "Dropped": 4,
-            "Plan to Watch": 6,
-            "All Anime": 7
-            } 
-
-    #Urls
-    LOGIN_URL = u"https://myanimelist.net/login.php"
-    LIST_URL = u"https://myanimelist.net/animelist/{}".format(MAL_PAYLOAD["user_name"])
-
-    #Driver Options - Hide Window
-    CHROMEDRIVER_PATH = "chromedriver"
-    WINDOW_SIZE = "1920, 1080"
-    chrome_options = Options()  
-    chrome_options.add_argument("--headless")  
-    chrome_options.add_argument("--window-size=%s" % WINDOW_SIZE)
-
-    #Initiate driver and load page
-    browser = webdriver.Chrome(
-        executable_path = CHROMEDRIVER_PATH,
-        chrome_options = chrome_options
-        )
-    browser.get(LOGIN_URL)
-
-    #Skip privacy policy
-    try:
-        browser.find_element_by_xpath("//html//body//div[7]//div//div[2]//div//button").click()
-    except:
-        pass
-
-    #Login
-    username = browser.find_element_by_id("loginUserName")
-    password = browser.find_element_by_id("login-password")
-    username.send_keys(MAL_PAYLOAD["user_name"])
-    password.send_keys(MAL_PAYLOAD["password"])
-    time.sleep(3)
-    browser.find_element_by_xpath("//input[@value=\"Login\"]").click()
-
-    verify_login()

@@ -3,17 +3,25 @@ from pckg.src.login import *
 def test():
     from pckg.src.anime import anime
 
-    names = ["sword art online",
-             ".hack//g.u. trilogy",
-             ".hack//g.u. returner",
-             ".hack//sign",
-             ".hack//intermezzo",
-             ".hack//liminality",
-             "log horizon",
-             "btooom!",
-             "mahoutsukai no yome",
-             "shinsekai yori"]
-    urls = ["https://myanimelist.net/anime/11757/Sword_Art_Online",
+    names = ["occultic;nine",
+             "black clover",]
+    '''
+    "fate/stay night movie: heaven's feel - i. presage flower",
+    "sword art online",
+    ".hack//g.u. trilogy",
+    ".hack//g.u. returner",
+    ".hack//sign",
+    ".hack//intermezzo",
+    ".hack//liminality",
+    "log horizon",
+    "btooom!",
+    "mahoutsukai no yome",
+    "shinsekai yori"]
+    '''
+    urls = ["https://myanimelist.net/anime/32962/Occultic_Nine",
+            "https://myanimelist.net/anime/34572/Black_Clover",
+            "https://myanimelist.net/anime/25537/Fate_stay_night_Movie__Heavens_Feel_-_I_Presage_Flower",
+            "https://myanimelist.net/anime/11757/Sword_Art_Online",
             "https://myanimelist.net/anime/3269/hack__GU_Trilogy",
             "https://myanimelist.net/anime/2928/hack__GU_Returner",
             "https://myanimelist.net/anime/48/hack__Sign",
@@ -23,7 +31,10 @@ def test():
             "https://myanimelist.net/anime/14345/Btooom",
             "https://myanimelist.net/anime/35062/Mahoutsukai_no_Yome",
             "https://myanimelist.net/anime/13125/Shinsekai_yori"]
-    IDS = ["11757",
+    IDS = ["32962",
+           "34572",
+           "25537",
+           "11757",
            "3269",
            "2928",
            "48",
@@ -34,6 +45,9 @@ def test():
            "35062",
            "13125"]
     tabs = ["Plan to Watch",
+            "Dropped",
+            "Completed",
+            "Plan to Watch",
             "Plan to Watch",
             "Plan to Watch",
             "Completed",
@@ -47,8 +61,11 @@ def test():
     #Get anime in each tab
     animes = []
 
+    #Initiate browser
+    browser, list_url = login()
+
     #Go to my list for testing but don't need data
-    goto_anime_list("", u"https://myanimelist.net/animelist/Combinatorics")
+    goto_anime_list(browser, u"https://myanimelist.net/animelist/Combinatorics")
 
     for i in range(0, len(names)):
         #Preselected data
@@ -60,9 +77,12 @@ def test():
         animes.append(anime(browser, name, url, ID, tab))
 
     #Replace related anime and recommendations with objects
-    for anime in animes:
-        anime.replace_anime(animes, "related")
-        anime.replace_anime(animes, "recommendations")
+    for ani in animes:
+        anime.save(ani)
+        anime.load(ani)
+        
+        ani.replace_anime(animes, "related")
+        ani.replace_anime(animes, "recommendations")
 
     #Get rankings
     rank(animes)

@@ -1,8 +1,11 @@
 from pckg.src.login import *
 
-def test():  
+def test():
+    #Initiate browser
+    browser, list_url = login()
+    
     #Clear tags and then add new ones
-    urls, anime_list = goto_anime_list()
+    urls, anime_list = goto_anime_list(browser, list_url)
 
     for i in range(0, len(anime_list)):
         #Remove tags

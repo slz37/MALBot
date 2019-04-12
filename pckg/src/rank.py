@@ -37,9 +37,12 @@ def rank(animes):
             rec_scores.append(rec)
             num_rec.append(num)
 
+    #List of anime on PTW
+    PTW = [anime for anime in animes if anime.status == "Plan to Watch"]
+
     #Now calculate individual scores and rank
     print(genre_scores, "\n", rel_scores, "\n", num_rel, "\n", rec_scores, "\n", num_rec)
-    for i, anime in enumerate([anime for anime in animes if anime.status == "Plan to Watch"]):
+    for i, anime in enumerate(PTW):
         genre_rating = normalize(i, genre_scores)
         rel_rating = normalize(i, rel_scores)
         nrel_rating = normalize(i, num_rel)
