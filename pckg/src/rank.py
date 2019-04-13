@@ -155,14 +155,6 @@ def calculate_related_score(anime, animes, status):
 
     related_animes = [rel for rel in anime.related_anime if rel in animes]
 
-    '''
-    #Map values from [0, 20] to [0, 1] - may need to increase this later
-    if len(related_animes) > 20:
-        print("Warning, # of recommended animes is greater than scale factor.")
-        
-    scaled_rel = len(related_animes) / 20
-    '''
-
     #Calculate related anime score
     related_score = sum([(rel.user_rating * status[rel.status]) for rel in related_animes \
                          if rel.status != "Plan to Watch"])
@@ -180,14 +172,6 @@ def calculate_recommended_score(anime, animes, status):
     recommended_animes = anime.recommendations
     recommended_keys = [rec for rec in recommended_animes if rec in animes and rec.status != "Plan to Watch"]
     num_rec = sum([recommended_animes[rec] for rec in recommended_animes if rec in animes])
-
-    '''
-    #Map values from [0, 100] to [0, 1] - may need to increase this later
-    if len(recommended_animes) > 100:
-        print("Warning, # of recommended animes is greater than scale factor.")
-        
-    scaled_rec_values = [x / 100 for x in recommended_values]
-    '''
     
     #Calculate recommended anime score
     recommended_score = 0

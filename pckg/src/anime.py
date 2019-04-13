@@ -1,5 +1,4 @@
 from .libs import *
-import pickle
 
 class anime(): 
     def __init__(self, browser, name, url, ID, tab):
@@ -52,17 +51,6 @@ class anime():
         #Done now, so return back to list
         self._close_page(browser)
 
-    def _load_page(self, browser):
-        '''
-        Loads the anime's page to grab all
-        necessary info.
-        '''
-
-        #Load tab
-        time.sleep(3)
-        browser.execute_script("window.open(\"{}\");".format(self.url))
-        browser.switch_to_window(browser.window_handles[1])
-
     @staticmethod
     def save(ani):
         '''
@@ -71,7 +59,7 @@ class anime():
         to myanimelist.ent
         '''
         
-        file = open("anime.txt", "wb")
+        file = open("anime_list.txt", "wb")
         pickle.dump(ani, file)
         file.close()
 
@@ -82,11 +70,22 @@ class anime():
         its attributes.
         '''
         
-        file = open("anime.txt", "rb")
-        ani = pickle.load(file)
+        file = open("anime_list.txt", "rb")
+        anime_list = pickle.load(file)
         file.close()
 
-        return ani
+        return anime_list
+
+    def _load_page(self, browser):
+        '''
+        Loads the anime's page to grab all
+        necessary info.
+        '''
+
+        #Load tab
+        time.sleep(3)
+        browser.execute_script("window.open(\"{}\");".format(self.url))
+        browser.switch_to_window(browser.window_handles[1])
         
     def _close_page(self, browser):
         '''

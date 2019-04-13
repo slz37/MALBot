@@ -170,15 +170,11 @@ def goto_anime_list(browser, list_url = "", tab = ""):
     '''
     time.sleep(3)
 
+    #Go to specified tab, otherwise default
     if tab:
-        #Go to specified tab, otherwise default
-        if tab:
-            browser.get(list_url + "?status={}&tag=".format(TABS[tab]))
-        else:
-            browser.get(list_url)
+        browser.get(list_url + "?status={}&tag=".format(TABS[tab]))
     else:
         browser.get(list_url)
-        return
 
     #Get anime and urls
     anime_list = browser.find_elements_by_class_name("animetitle")
@@ -223,13 +219,14 @@ if __name__ == "__main__":
     from selenium.webdriver.common.keys import Keys
 
     import re, sys, os, time
+    import tkinter
+    from threading import Thread
 
     import getpass
     import psutil as psutil
+    import pickle
 else:
     from .libs import *
-    import getpass
-    import psutil as psutil
 
 #MAL Anime List Tabs
 TABS = {

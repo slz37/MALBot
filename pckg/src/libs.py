@@ -9,7 +9,9 @@ from selenium.webdriver.opera.options import Options as OperaOptions
 from selenium.webdriver.common.keys import Keys
 
 import re, sys, os, time
+import tkinter
+from threading import Thread
 
-from .anime import *
-from .tag import *
-from .rank import *
+import getpass
+import psutil as psutil
+import pickle

@@ -1,8 +1,6 @@
-from pckg.src.login import *
+from pckg.src import login, anime, rank
 
 def test():
-    from pckg.src.anime import anime
-
     names = ["occultic;nine",
              "black clover",
              "fate/stay night movie: heaven's feel - i. presage flower",
@@ -60,10 +58,10 @@ def test():
     animes = []
 
     #Initiate browser
-    browser, list_url = login()
+    browser, list_url = login.login()
 
     #Go to my list for testing but don't need data
-    goto_anime_list(browser, u"https://myanimelist.net/animelist/Combinatorics")
+    login.goto_anime_list(browser, u"https://myanimelist.net/animelist/Combinatorics")
 
     for i in range(0, len(names)):
         #Preselected data
@@ -72,17 +70,18 @@ def test():
         ID = IDS[i]
         tab = tabs[i]
         
-        animes.append(anime(browser, name, url, ID, tab))
+        animes.append(anime.anime(browser, name, url, ID, tab))
 
     #Replace related anime and recommendations with objects
     for ani in animes:      
         ani.replace_anime(animes, "related")
         ani.replace_anime(animes, "recommendations")
-    anime.save(animes)
 
-    animes = anime.load()
+    #Save and reload to make sure functional
+    anime.anime.save(animes)
+    animes = anime.anime.load()
 
     #Get rankings
-    rank(animes)
+    rank.rank(animes)
 
     browser.close()
