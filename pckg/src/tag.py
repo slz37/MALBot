@@ -87,7 +87,7 @@ def add_genres(browser, ID, string):
     tag.send_keys(string)
     browser.find_element_by_xpath("//input[@onclick=\"tag_add({},1)\"]".format(ID)).click()
 
-def replace_tag(browser, url, anime):
+def replace_tag(browser, anime):
     '''
     Searches the tags for the selected anime
     and compares them to the current tags.
@@ -97,7 +97,7 @@ def replace_tag(browser, url, anime):
 
     #Get anime info
     name = anime.text
-    url = url.get_attribute("href")
+    url = anime.get_attribute("href")
     ID = re.search(ID_PATTERN, url).group()
     tags = browser.find_element_by_xpath("//*[@id=\"tagLinks{}\"]".format(ID)).text
 
@@ -123,7 +123,7 @@ def replace_tag(browser, url, anime):
         time.sleep(0.5)
         add_genres(browser, ID, string)
 
-def update_tag(browser, url, anime):
+def update_tag(browser, anime):
     '''
     Searches the tags for the selected anime
     and compares them to the current tags.
@@ -133,7 +133,7 @@ def update_tag(browser, url, anime):
 
     #Get anime info
     name = anime.text
-    url = url.get_attribute("href")
+    url = anime.get_attribute("href")
     ID = re.search(ID_PATTERN, url).group()
     tags = browser.find_element_by_xpath("//*[@id=\"tagLinks{}\"]".format(ID)).text
 
@@ -157,7 +157,7 @@ def update_tag(browser, url, anime):
             time.sleep(3)
             add_genres(browser, ID, tag + ", ")
 
-def fill_empty_tag(browser, url, anime):
+def fill_empty_tag(browser, anime):
     '''
     If the specified anime has no tags, get
     the genres and studio and fill the tag.
@@ -165,7 +165,7 @@ def fill_empty_tag(browser, url, anime):
     
     #Get anime info
     name = anime.text
-    url = url.get_attribute("href")
+    url = anime.get_attribute("href")
     ID = re.search(ID_PATTERN, url).group()
     tags = browser.find_element_by_xpath("//*[@id=\"tagLinks{}\"]".format(ID)).text
 
@@ -179,7 +179,7 @@ def fill_empty_tag(browser, url, anime):
     string = get_genres(browser, url)
     add_genres(browser, ID, string)
 
-def remove_tag(browser, url, anime):
+def remove_tag(browser, anime):
     '''
     Removes the current tags of the
     specified anime
@@ -187,7 +187,7 @@ def remove_tag(browser, url, anime):
     
     #Get anime info
     name = anime.text
-    url = url.get_attribute("href")
+    url = anime.get_attribute("href")
     ID = re.search(ID_PATTERN, url).group()
     tags = browser.find_element_by_xpath("//*[@id=\"tagLinks{}\"]".format(ID)).text
 

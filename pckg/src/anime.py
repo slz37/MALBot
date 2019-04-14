@@ -13,9 +13,23 @@ class anime():
         self.url = url
         self.ID = ID
         self.status = tab
-        
-        self.user_rating = browser.find_element_by_id("scoreval{}".format(self.ID)).text
 
+        #Get rating for user, different structure if not logged in
+        try:
+            self.user_rating = browser.find_element_by_id("scoreval{}".format(self.ID)).text
+        except:
+            temp_list = browser.find_elements_by_tag_name("table")
+            temp_row = [ani.text for ani in temp_list if "\n" + self.name + " " in ani.text][0]
+            temp_row = temp_row.split(self.name + " ")[1]
+
+            #Deal with airing or not yet aired shows
+            if temp_row.startswith("Airing"):
+                self.user_rating = temp_row.split("Airing ")[1].split(" ")[0]
+            elif temp_row.startswith("Not Yet Aired"):
+                self.user_rating = temp_row.split("Not Yet Aired ")[1].split(" ")[0]
+            else:
+                self.user_rating = temp_row.split(" ")[0]
+            
         #Set default rating and convert to int if necessary
         if self.user_rating == "-":
             self.user_rating = 0 #use 0 as base
@@ -52,25 +66,25 @@ class anime():
         self._close_page(browser)
 
     @staticmethod
-    def save(ani):
+    def save(ani, user):
         '''
         Save class state and attributes for
         later use to reduce requests
         to myanimelist.ent
         '''
         
-        file = open("anime_list.txt", "wb")
+        file = open("{}_anime_list.txt".format(user), "wb")
         pickle.dump(ani, file)
         file.close()
 
     @staticmethod
-    def load():
+    def load(user):
         '''
         Loads a previously parse anime with
         its attributes.
         '''
         
-        file = open("anime_list.txt", "rb")
+        file = open("{}_anime_list.txt".format(user), "rb")
         anime_list = pickle.load(file)
         file.close()
 

@@ -1,11 +1,45 @@
 from .libs import *
 
-def rank(animes):
+def calculate_parameters(animes):
     '''
-    Ranks anime on the plan to watch
-    list of a user to aid in choosing
-    a user's next anime they should
-    watch.
+    Gathers the data for each
+    parameter for every anime on the
+    user's list and outputs to a file
+    for use with machine learning.
+    '''
+
+    #Not sure how to weight these yet - should be some percentage
+    status = {
+        "Dropped": 0,
+        "On Hold": 1/4,
+        "Plan to Watch": 2/4,
+        "Currently Watching": 3/4,
+        "Completed": 1,
+        }
+    data = []
+
+    #Setup and calculate genre avgs
+    genres, avgs, _, _ = setup_genres()
+
+    #Create parameter lists
+    for anime in animes:
+        if anime.status == "Plan to Watch": 
+            for i in range(len(genres)):
+                if genres[i] in anime.genres:
+                    avgs[i] = 1
+            rel_score = calculate_related_score(anime, animes, status)
+            num_rel = len([rel for rel in anime.related_anime if rel in animes])
+            rec, num = calculate_recommended_score(anime, animes, status)
+
+            data.append(avgs + [rel_score] + [num_rel] + [rec] + [num])
+
+    return data
+
+def naive_ranking(animes):
+    '''
+    Performs a naive ranking of
+    each anime on the PTW list
+    by average several parameters.
     '''
 
     #Not sure how to weight these yet - should be some percentage
@@ -40,18 +74,20 @@ def rank(animes):
     #List of anime on PTW
     PTW = [anime for anime in animes if anime.status == "Plan to Watch"]
 
+    #print(genre_scores, "\n", rel_scores, "\n", num_rel, "\n", rec_scores, "\n", num_rec)
+
     #Now calculate individual scores and rank
-    print(genre_scores, "\n", rel_scores, "\n", num_rel, "\n", rec_scores, "\n", num_rec)
     for i, anime in enumerate(PTW):
         genre_rating = normalize(i, genre_scores)
         rel_rating = normalize(i, rel_scores)
         nrel_rating = normalize(i, num_rel)
         rec_rating = normalize(i, rec_scores)
         nrec_rating = normalize(i, num_rec)
-        print(anime.name, genre_rating, rel_rating, nrel_rating, rec_rating, nrec_rating)
+
+        #print(anime.name, genre_rating, rel_rating, nrel_rating, rec_rating, nrec_rating)
 
         anime.ranking = (genre_rating + rel_rating + nrel_rating + rec_rating + nrec_rating) / 5
-    
+
     #Now sort by final rankings
     rankings = sorted(animes, key = lambda x: x.ranking, reverse = True)
 
@@ -94,7 +130,7 @@ def setup_genres():
     
     avgs = [0.0]*len(genres) #Initialize at 0 to start at base value
     var = [0.0]*len(genres) #Initialize at 0 to start at base value
-    nums = [0]*len(genres)   #Pretend there's already an anime rated at 5
+    nums = [0]*len(genres)
 
     return genres, avgs, var, nums    
 

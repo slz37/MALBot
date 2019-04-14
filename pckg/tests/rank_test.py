@@ -82,6 +82,6 @@ def test():
     animes = anime.anime.load()
 
     #Get rankings
-    rank.rank(animes)
+    rank.naive_ranking(animes)
 
     browser.close()

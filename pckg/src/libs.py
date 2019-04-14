@@ -9,8 +9,6 @@ from selenium.webdriver.opera.options import Options as OperaOptions
 from selenium.webdriver.common.keys import Keys
 
 import re, sys, os, time
-import tkinter
-from threading import Thread
 
 import getpass
 import psutil as psutil

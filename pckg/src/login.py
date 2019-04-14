@@ -178,9 +178,8 @@ def goto_anime_list(browser, list_url = "", tab = ""):
 
     #Get anime and urls
     anime_list = browser.find_elements_by_class_name("animetitle")
-    urls = browser.find_elements_by_xpath("//*[@class=\"animetitle\"]")
 
-    return urls, anime_list
+    return anime_list
 
 def get_user_list_url(browser):
     '''
@@ -225,6 +224,8 @@ if __name__ == "__main__":
     import getpass
     import psutil as psutil
     import pickle
+
+    browser, _ = login()
 else:
     from .libs import *
 

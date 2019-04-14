@@ -1,4 +1,10 @@
-selenium
 getpass
+pickle
 psutil
-tkinter
+os
+re
+selenium
+sklearn
+sys
+threading
+time

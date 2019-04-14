@@ -1,16 +1,13 @@
 from pckg.src.libs import *
 from pckg.src import login, tag, anime, rank
-        
-def load():
-    '''
-    Loads anime data from previously saved file.
-    '''
-    
-    try:
-        anime_list = anime.anime.load()
-        print("Loaded anime succesfully.")
-    except:
-        print("Failed to load anime.")
+import numpy as np
+from matplotlib import pyplot as plt
+from sklearn.datasets import load_boston
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.neural_network import MLPRegressor
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import cross_val_predict
 
 def begin_tag():
     '''
@@ -22,27 +19,29 @@ def begin_tag():
     browser, list_url = login.login()
     
     #Clear tags and then add new ones
-    urls, anime_list = login.goto_anime_list(browser, list_url)
+    anime_list = login.goto_anime_list(browser, list_url)
 
     for i in range(0, len(anime_list)):
         #Remove tags
-        #tag.remove_tag(browser, urls[i], anime_list[i])
+        #tag.remove_tag(browser, anime_list[i])
 
         #Fill any empty slots
-        tag.fill_empty_tag(browser, urls[i], anime_list[i])
+        tag.fill_empty_tag(browser, anime_list[i])
 
         #Or replace all tags
-        #tag.replace_tag(browser, urls[i], anime_list[i])
+        #tag.replace_tag(browser, anime_list[i])
 
         #Or update tags
-        #tag.update_tag(browser, urls[i], anime_list[i])
+        #tag.update_tag(browser, anime_list[i])
 
     browser.close()
     
-def begin_rank():
+def write_anime_to_file():
     '''
-    Creates a ranking of anime on the
-    user's PTW list.
+    Gathers data for each anime on user's
+    page and writes the data to file for
+    use with machine learning to rank
+    anime on the PTW list.
     '''
 
     #MAL Anime List Tabs
@@ -58,15 +57,16 @@ def begin_rank():
 
     #Initiate browser
     browser, list_url = login.login()
+    list_url = u"https://myanimelist.net/animelist/Paul"
     
     #Get anime in each tab
     for tab in TABS:
         #Skip all anime tab - avoid double counting
-        if tab != "Currently Watching":
+        if tab == "All Anime":
             continue
 
         #Go to user's MAL anime list
-        anime_list, urls = login.goto_anime_list(browser, list_url, tab)
+        anime_list = login.goto_anime_list(browser, list_url, tab)
 
         #Break if user has nothing on PTW
         if tab == "Plan to Watch" and len(anime_list) == 0:
@@ -81,7 +81,7 @@ def begin_rank():
             for i in range(len(anime_list)):
                 #Get anime info
                 name = anime_list[i].text
-                url = urls[i].get_attribute("href")
+                url = anime_list[i].get_attribute("href")
                 ID = re.search(ID_PATTERN, url).group()
 
                 #Instantiate class
@@ -96,14 +96,70 @@ def begin_rank():
             animes += temp
 
     #Save to file for future use
-    anime.anime.save(animes)
-
-    #Rank
-    rank.rank(animes)
-    browser.close()
+    user = list_url.split("/")[-1]
+    anime.anime.save(animes, user)
 
 if __name__ == "__main__":
     #Initiate Setup
     ID_PATTERN = re.compile("(?<=/)[\d]+(?=/)")
+    data = []
+    target = []
+    write_anime_to_file()
+    sys.exit()
 
-    begin_rank()
+    '''
+    boston = load_boston()
+    #print boston.DESCR
+
+    X = boston.data
+    y = boston.target
+
+    Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size = 0.25, random_state = 42)
+    '''
+
+    #Write anime to file, load it back, and use naive rankings
+##    write_anime_to_file()
+##    animes = anime.anime.load()
+##    rank.naive_ranking(animes)
+
+    #Load anime, save data parameters to file, and rank using machine learning
+    animes = anime.anime.load(user)
+
+    #Select training set
+    training_set = [ani for ani in animes if ani.status == "Completed"]
+
+    #Setup training set
+    for ani in training_set:
+        ani.status = "Plan to Watch"
+        target.append(ani.user_rating)
+    Xtrain, Xtest, ytrain, ytest = train_test_split(training_set, target, test_size = 0.2, random_state = 42)
+
+    rank.calculate_parameters(Xtrain)
+    sys.exit()
+
+    clf = MLPRegressor(solver = 'lbfgs', alpha = 1e-5, hidden_layer_sizes = (5,2), random_state = 1)
+    clf.fit(Xtrain, ytrain)
+
+    # Look at the weights
+    print ([coef.shape for coef in clf.coefs_])
+
+    ypred = clf.predict(Xtest)
+    #print ypred, ytest
+
+    fig = plt.figure(figsize = (6, 6))
+    plt.scatter(ytest, ypred)
+    plt.xlabel("Actual Value [x$1000]")
+    plt.ylabel("Predicted Value [x$1000]")
+    plt.show()
+
+    yCVpred = cross_val_predict(clf, X, y, cv = 10) # Complete
+
+    fig = plt.figure(figsize = (6, 6))
+    plt.scatter(y, yCVpred)
+    plt.xlabel("Actual Value [x$1000]")
+    plt.ylabel("Predicted Value [x$1000]")
+    plt.show()
+
+    #Train
+    #Select PTW as new set
+    #Run on PTW set
