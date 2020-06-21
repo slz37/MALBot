@@ -1,13 +1,7 @@
-from pckg.src.libs import *
-from pckg.src import login, tag, anime, rank
+from MALBot.src.libs import *
+from MALBot.src import login, tag, anime, rank
 import numpy as np
 from matplotlib import pyplot as plt
-from sklearn.datasets import load_boston
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LinearRegression
-from sklearn.neural_network import MLPRegressor
-from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import cross_val_predict
 
 def begin_tag():
     '''
@@ -17,6 +11,13 @@ def begin_tag():
 
     #Initiate browser
     browser, list_url = login.login()
+
+    #Close cookies agreement
+    time.sleep(5)
+    try:
+        browser.find_element_by_xpath("//*[@id=\"gdpr-modal-bottom\"]/div/div/div[2]/button").click()
+    except:
+        pass
     
     #Clear tags and then add new ones
     anime_list = login.goto_anime_list(browser, list_url)
@@ -34,7 +35,7 @@ def begin_tag():
         #Or update tags
         #tag.update_tag(browser, anime_list[i])
 
-    browser.close()
+    browser.quit()
     
 def write_anime_to_file():
     '''
@@ -57,7 +58,6 @@ def write_anime_to_file():
 
     #Initiate browser
     browser, list_url = login.login()
-    list_url = u"https://myanimelist.net/animelist/Paul"
     
     #Get anime in each tab
     for tab in TABS:
@@ -104,62 +104,13 @@ if __name__ == "__main__":
     ID_PATTERN = re.compile("(?<=/)[\d]+(?=/)")
     data = []
     target = []
-    write_anime_to_file()
+    user = "combinatorics"
+
+    begin_tag()
     sys.exit()
-
-    '''
-    boston = load_boston()
-    #print boston.DESCR
-
-    X = boston.data
-    y = boston.target
-
-    Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size = 0.25, random_state = 42)
-    '''
 
     #Write anime to file, load it back, and use naive rankings
 ##    write_anime_to_file()
-##    animes = anime.anime.load()
-##    rank.naive_ranking(animes)
-
-    #Load anime, save data parameters to file, and rank using machine learning
     animes = anime.anime.load(user)
-
-    #Select training set
-    training_set = [ani for ani in animes if ani.status == "Completed"]
-
-    #Setup training set
-    for ani in training_set:
-        ani.status = "Plan to Watch"
-        target.append(ani.user_rating)
-    Xtrain, Xtest, ytrain, ytest = train_test_split(training_set, target, test_size = 0.2, random_state = 42)
-
-    rank.calculate_parameters(Xtrain)
+    rank.naive_ranking(animes)
     sys.exit()
-
-    clf = MLPRegressor(solver = 'lbfgs', alpha = 1e-5, hidden_layer_sizes = (5,2), random_state = 1)
-    clf.fit(Xtrain, ytrain)
-
-    # Look at the weights
-    print ([coef.shape for coef in clf.coefs_])
-
-    ypred = clf.predict(Xtest)
-    #print ypred, ytest
-
-    fig = plt.figure(figsize = (6, 6))
-    plt.scatter(ytest, ypred)
-    plt.xlabel("Actual Value [x$1000]")
-    plt.ylabel("Predicted Value [x$1000]")
-    plt.show()
-
-    yCVpred = cross_val_predict(clf, X, y, cv = 10) # Complete
-
-    fig = plt.figure(figsize = (6, 6))
-    plt.scatter(y, yCVpred)
-    plt.xlabel("Actual Value [x$1000]")
-    plt.ylabel("Predicted Value [x$1000]")
-    plt.show()
-
-    #Train
-    #Select PTW as new set
-    #Run on PTW set

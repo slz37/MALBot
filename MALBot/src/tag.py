@@ -66,7 +66,6 @@ def get_genres(browser, url):
 
     #Add studios
     string = get_studio(browser, string)
-
     string = string[:-2]
 
     #Close tab

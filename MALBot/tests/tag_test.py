@@ -1,4 +1,4 @@
-from pckg.src import login, tag
+from MALBot.src import login, tag
 
 def test():
     #Initiate browser

@@ -1,0 +1,6 @@
+#folders:
+storage/
+__pycache__/
+
+#files:
+combinatorics_anime_list.txt

@@ -97,7 +97,7 @@ class anime():
         '''
 
         #Load tab
-        time.sleep(3)
+        time.sleep(20)
         browser.execute_script("window.open(\"{}\");".format(self.url))
         browser.switch_to_window(browser.window_handles[1])
         

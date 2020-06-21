@@ -109,7 +109,7 @@ def choose_free_browser():
         options = OperaOptions()
 
         options.binary_location = "C:\\Users\\" + getpass.getuser() + \
-                                  "\\AppData\\Local\\Programs\\Opera\\58.0.3135.131\\opera.exe"
+                                  "\\AppData\\Local\\Programs\\Opera\\58.0.3135.132\\opera.exe"
 
         #Choose driver
         try:
@@ -154,13 +154,16 @@ def verify_login(browser):
     
     #Check for logout form
     forms = browser.find_elements_by_xpath("//form[@action=\"https://myanimelist.net/logout.php\"]")
-    if forms:
-        print("Login successful")
-        return
-    else:
-        print("Please login to MAL before running this program.")
-        sys.exit()
-
+    if not forms:
+        #Try to login with autosave
+        try:
+            browser.get(u"https://myanimelist.net/login.php?")
+            browser.find_element_by_name("sublogin").click()
+        except:
+            print("Please login to MAL before running this program.")
+            sys.exit()
+    print("Login successful")
+    
 def goto_anime_list(browser, list_url = "", tab = ""):
     '''
     Moves to anime list and gathers the urls and

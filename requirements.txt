@@ -6,5 +6,4 @@ re
 selenium
 sklearn
 sys
-threading
 time

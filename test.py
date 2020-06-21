@@ -1,4 +1,4 @@
-from pckg.tests import tag_test, rank_test
+from MALBot.tests import tag_test, rank_test
 
 #print("Testing tags")
 #tag_test.test()

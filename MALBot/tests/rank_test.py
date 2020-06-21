@@ -1,4 +1,4 @@
-from pckg.src import login, anime, rank
+from MALBot.src import login, anime, rank
 
 def test():
     names = ["occultic;nine",
